@@ -72,6 +72,7 @@ def get_links(query):
                     header = sublink_container.find("h3")
                     sublinks.append((header.find("a").getText(), header.find("a").get("href")))
             final_results.add_result(GoogleResult(title, link, sublinks))
+            
     results = soup.find_all("div", class_="g tF2Cxc")
     for result in results:
         link_container = result.find("div", class_="yuRUbf")
@@ -79,13 +80,29 @@ def get_links(query):
             title = link_container.find("h3").getText()
             link = link_container.find("a").get("href")
             final_results.add_result(GoogleResult(title, link, []))
+
     results = soup.find_all("div", class_="g")
     for result in results:
-        link_container = result.find("div", class_="yuRUbf")
-        if (link_container != None):
-            title = link_container.find("h3").getText()
-            link = link_container.find("a").get("href")
-            final_results.add_result(GoogleResult(title, link, []))
+        temp = GoogleResult(None, None, [])
+        link_containers = result.find_all("div", class_="yuRUbf")
+        first_link = True
+        sublinks = []
+        for link_container in link_containers:
+            if (link_container != None):
+                title = link_container.find("h3").getText()
+                link = link_container.find("a").get("href")
+                if (len(link_containers) == 0):
+                    temp.title = title
+                    temp.link = link
+                    final_results.add_result(temp)
+                else:
+                    if (first_link):
+                        temp.link = link
+                        temp.title = title
+                    else:
+                        temp.add_sublink((title, link))
+                first_link = False
+        final_results.add_result(temp)
     return final_results
     
-print(get_links("wendys"))
+print(get_links(input()))
